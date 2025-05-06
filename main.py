@@ -2,9 +2,9 @@ from flask import Flask, render_template, request, jsonify
 import openai
 import os
 import logging
-import tiktoken
 import time
 from knowledge_base_handler import KnowledgeBaseHandler
+from token_utils import count_tokens, log_message
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -21,17 +21,8 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 # Initialize knowledge base handler
 kb_handler = KnowledgeBaseHandler(openai_api_key=openai_api_key)
 
-# Function to count tokens in a text
-def count_tokens(text, model="gpt-4o"):
-    """Count the number of tokens in a text string using tiktoken."""
-    try:
-        encoder = tiktoken.encoding_for_model(model)
-        return len(encoder.encode(text))
-    except Exception as e:
-        logger.error(f"Error counting tokens: {str(e)}")
-        # Use cl100k_base as fallback encoding if specific model encoding not found
-        encoder = tiktoken.get_encoding("cl100k_base")
-        return len(encoder.encode(text))
+# Default model to use for OpenAI API calls
+DEFAULT_MODEL = "gpt-4o"  # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
 
 # System prompt for the AI support bot
 SYSTEM_PROMPT = """
@@ -71,9 +62,10 @@ def chat():
     try:
         start_time = time.time()
         
-        # Count input tokens
-        system_tokens = count_tokens(SYSTEM_PROMPT)
-        user_tokens = count_tokens(user_input)
+        # Log and count user message tokens
+        user_tokens = log_message("user", user_input, DEFAULT_MODEL)
+        system_tokens = count_tokens(SYSTEM_PROMPT, DEFAULT_MODEL)
+        
         logger.debug(f"Token counts - System prompt: {system_tokens}, User input: {user_tokens}")
         
         # Try to get information from knowledge base first
@@ -100,7 +92,7 @@ def chat():
             # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
             # do not change this unless explicitly requested by the user
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model=DEFAULT_MODEL,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": user_input}
@@ -111,13 +103,14 @@ def chat():
         else:
             answer = kb_answer
         
-        # Count output tokens
-        output_tokens = count_tokens(answer)
+        # Log and count assistant response tokens
+        output_tokens = log_message("assistant", answer, DEFAULT_MODEL)
         total_tokens = system_tokens + user_tokens + output_tokens
         
-        # Log token usage
-        logger.debug(f"Output tokens: {output_tokens}, Total tokens: {total_tokens}")
+        # Log additional information
+        logger.debug(f"Total tokens: {total_tokens}")
         logger.debug(f"Total processing time: {time.time() - start_time:.2f}s")
+        logger.info(f"Sources: {sources}")
         
         # Return the response with token information and sources
         response_data = {
@@ -136,7 +129,9 @@ def chat():
         return jsonify(response_data)
     
     except Exception as e:
-        logger.error(f"Error in chat endpoint: {str(e)}")
+        error_msg = f"Error in chat endpoint: {str(e)}"
+        logger.error(error_msg)
+        log_message("error", error_msg)
         return jsonify({"reply": f"An error occurred: {str(e)}"}), 500
 
 if __name__ == "__main__":
