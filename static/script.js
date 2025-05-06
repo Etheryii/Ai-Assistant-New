@@ -97,6 +97,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add bot response to chat
             addMessage(data.reply, false);
+            
+            // Check if token usage info is available
+            if (data.token_usage) {
+                // Log token usage to console
+                console.log('Token usage:', data.token_usage);
+                
+                // Display token usage in a small info message
+                const tokenInfo = document.createElement('div');
+                tokenInfo.className = 'token-info text-muted small mt-1 mb-3';
+                tokenInfo.innerHTML = `
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Token usage: ${data.token_usage.total_tokens} total 
+                        (${data.token_usage.input_tokens} input, ${data.token_usage.output_tokens} output)
+                    </small>
+                `;
+                chatMessages.appendChild(tokenInfo);
+                scrollToBottom();
+            }
         } catch (error) {
             // Hide typing indicator
             hideTypingIndicator();

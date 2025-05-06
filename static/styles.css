@@ -98,6 +98,18 @@
     padding-top: 15px;
 }
 
+/* Token usage info styling */
+.token-info {
+    text-align: center;
+    color: var(--bs-secondary);
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.token-info:hover {
+    opacity: 1;
+}
+
 /* For mobile responsiveness */
 @media (max-width: 768px) {
     .message {
