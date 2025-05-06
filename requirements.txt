@@ -1,0 +1,10 @@
+flask
+langchain
+openai
+chromadb
+tiktoken
+unstructured
+sentence-transformers
+python-dotenv
+gunicorn
+
