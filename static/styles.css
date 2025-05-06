@@ -90,15 +90,16 @@ body {
 /* Header styles */
 header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 2rem;
-    padding: 0.5rem 1rem;
+    padding: 1rem;
     border-radius: 1rem;
     background: rgba(30, 30, 60, 0.5);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(100, 100, 255, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 
+                0 0 30px rgba(123, 66, 245, 0.2);
 }
 
 .logo-section {
@@ -110,43 +111,28 @@ header {
     font-size: 2.5rem;
     color: var(--accent-color);
     margin-right: 1rem;
-    text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color);
+    text-shadow: 0 0 5px var(--accent-color); /* Reduced glow on robot icon */
 }
 
 .logo-text {
     font-family: var(--font-futuristic);
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     margin: 0;
-    background: linear-gradient(to right, var(--accent-color), var(--primary-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    position: relative;
+    overflow: hidden;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.company-badge {
-    position: relative;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    padding: 0.5rem 1.5rem;
-    border-radius: 2rem;
-    box-shadow: 0 0 15px rgba(123, 66, 245, 0.7);
-    overflow: hidden;
-}
-
-.badge-content {
+.logo-text-content {
+    background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     position: relative;
     z-index: 1;
 }
 
-.company-name {
-    font-family: var(--font-futuristic);
-    font-weight: bold;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.glow-effect {
+.logo-glow-effect {
     position: absolute;
     width: 30px;
     height: 100%;
@@ -158,6 +144,7 @@ header {
                 transparent);
     animation: glow-animation 3s ease-in-out infinite;
     transform: skewX(-30deg);
+    z-index: 2;
 }
 
 @keyframes glow-animation {
