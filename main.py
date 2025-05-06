@@ -261,6 +261,8 @@ def analytics_dashboard():
 with app.app_context():
     # Create tables if they don't exist
     db.create_all()
+    # Initialize sample data
+    init_database_data()
 
 if __name__ == "__main__":
     # Run the server on port 5000 with host 0.0.0.0 (accessible from outside)
