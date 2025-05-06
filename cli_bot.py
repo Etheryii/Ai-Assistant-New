@@ -13,7 +13,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import TextLoader
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # ANSI color codes for terminal output
 CYAN = "\033[96m"
