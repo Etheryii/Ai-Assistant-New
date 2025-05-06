@@ -1,4 +1,4 @@
-// Script for AI Support Bot Chat Interface
+// Script for Etherius AI Support Bot Interface
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
@@ -7,11 +7,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const typingIndicator = document.getElementById('typing-indicator');
     const useKnowledgeBaseToggle = document.getElementById('use-knowledge-base');
+    const chatContainer = document.getElementById('chat-container');
     
-    // Token counter elements
-    const inputTokensElement = document.getElementById('input-tokens');
-    const outputTokensElement = document.getElementById('output-tokens');
-    const totalTokensElement = document.getElementById('total-tokens');
+    // Initialize - focus on input
+    userInput.focus();
+    
+    // Generate stars dynamically (optional enhancement)
+    function generateStars() {
+        const starsContainer = document.querySelector('.stars-container');
+        if (starsContainer) {
+            const starCount = 100;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 10}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+    }
     
     // Auto-resize textarea as user types
     userInput.addEventListener('input', function() {
@@ -32,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear input and reset height
         userInput.value = '';
         userInput.style.height = 'auto';
+        userInput.focus();
         
         // Show typing indicator
         showTypingIndicator();
@@ -40,9 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
         sendMessage(message);
     });
     
-    // Function to scroll chat to bottom
+    // Function to scroll chat to bottom with smooth animation
     function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatContainer.scrollTo({
+            top: chatContainer.scrollHeight,
+            behavior: 'smooth'
+        });
     }
     
     // Function to add a message to the chat
@@ -76,10 +95,12 @@ document.addEventListener('DOMContentLoaded', function() {
         messageDiv.appendChild(messageContent);
         
         chatMessages.appendChild(messageDiv);
-        scrollToBottom();
+        
+        // Add a small delay before scrolling to allow the DOM to update
+        setTimeout(scrollToBottom, 50);
     }
     
-    // Function to format message content (basic markdown-like formatting)
+    // Function to format message content (enhanced markdown-like formatting)
     function formatMessageContent(content) {
         // Convert URLs to links
         content = content.replace(
@@ -93,10 +114,28 @@ document.addEventListener('DOMContentLoaded', function() {
             '<pre><code>$1</code></pre>'
         );
         
+        // Convert ```language code blocks with language specifier
+        content = content.replace(
+            /```(\w+)\n([^`]+)```/g, 
+            '<pre><code class="language-$1">$2</code></pre>'
+        );
+        
         // Convert `inline code` to <code> elements
         content = content.replace(
             /`([^`]+)`/g, 
             '<code>$1</code>'
+        );
+        
+        // Convert **bold** to <strong> elements
+        content = content.replace(
+            /\*\*([^*]+)\*\*/g, 
+            '<strong>$1</strong>'
+        );
+        
+        // Convert *italic* to <em> elements
+        content = content.replace(
+            /\*([^*]+)\*/g, 
+            '<em>$1</em>'
         );
         
         // Convert line breaks to <p> tags
@@ -108,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
     }
     
-    // Function to show typing indicator
+    // Function to show typing indicator with glow effect
     function showTypingIndicator() {
         typingIndicator.style.display = 'inline-flex';
         scrollToBottom();
@@ -119,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         typingIndicator.style.display = 'none';
     }
     
-    // Function to send message to server
+    // Function to send message to server with improved error handling
     async function sendMessage(message) {
         try {
             const response = await fetch('/chat', {
@@ -145,17 +184,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // Display bot response
             addMessage(data.reply, false, data.sources);
             
-            // Update token usage information
-            if (data.token_usage) {
-                inputTokensElement.textContent = data.token_usage.input_tokens;
-                outputTokensElement.textContent = data.token_usage.output_tokens;
-                totalTokensElement.textContent = data.token_usage.total_tokens;
-            }
-            
         } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
             addMessage('Sorry, there was an error processing your request. Please try again.', false);
         }
     }
+    
+    // Add keyboard shortcut for sending messages with Enter key (if not using Shift+Enter for newlines)
+    userInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+    
+    // Initialize any dynamic UI elements
+    // generateStars(); // Uncomment if you want to generate stars dynamically
 });
